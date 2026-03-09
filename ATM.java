@@ -1,10 +1,11 @@
 import java.util.*;
 class ATM{
+    static Scanner sc = new Scanner(System.in);
     public static void run(){
-        Scanner sc = new Scanner(System.in);
         System.out.println("Enter your PIN:");
         int pin = sc.nextInt();
-        if(main.user.containsKey(pin)){
+        int count =0;
+        if(Main.user.containsKey(pin)){
             while(true){
                 System.out.println("1. Check Balance");
                 System.out.println("2. Withdraw");
@@ -24,7 +25,7 @@ class ATM{
                         deposit(pin);
                         break;
                     case 4:
-                        pin = changepin(pin); // update session PIN
+                        pin = changepin(pin);
                         break;
                     case 5:
                         System.out.println("Thank you for using ATM.");
@@ -36,23 +37,19 @@ class ATM{
         }
         else{
             System.out.println("Invalid PIN");
+            count++;
+            if(count >= 3){
+                System.out.println("Too many failed attempts. Exiting.");
+                return;
+            }
         }
     }
     public static void get_balance(int pin){
-        if(!main.user.containsKey(pin)){
-            System.out.println("Invalid PIN. Unable to check balance.");
-            return;
-        }
-        System.out.println("Your balance is: " + main.user.get(pin));
+        System.out.println("Your balance is: " + Main.user.get(pin));
     }
     public static void withdraw(int pin){
-        if(!main.user.containsKey(pin)){
-            System.out.println("Invalid PIN. Cannot withdraw.");
-            return;
-        }
-        double balance = main.user.get(pin);
+        double balance = Main.user.get(pin);
         System.out.println("Enter the amount to withdraw:");
-        Scanner sc = new Scanner(System.in);
         double amount = sc.nextDouble();
         if(amount <= 0){
             System.out.println("Invalid Amount.");
@@ -67,43 +64,37 @@ class ATM{
         }
         else{
             balance -= amount;
-            main.user.put(pin, balance);
+            Main.user.put(pin, balance);
             System.out.println("Amount Withdrawn Successfully.");
         }
     }
     public static int changepin(int pin){
         System.out.println("Enter the new PIN:");
-        Scanner sc = new Scanner(System.in);
         int newpin = sc.nextInt();
-        if(main.user.containsKey(newpin)){
+        if(Main.user.containsKey(newpin)){
             System.out.println("This PIN is already in use. Change aborted.");
             return pin;
         }
-        double balance = main.user.get(pin);
-        main.user.put(newpin, balance);
-        main.user.remove(pin);
+        double balance = Main.user.get(pin);
+        Main.user.put(newpin, balance);
+        Main.user.remove(pin);
         System.out.println("PIN Changed Successfully.");
-        return newpin; // return updated PIN for the running session
+        return newpin;
     }
     public static void deposit(int pin){
-        if(!main.user.containsKey(pin)){
-            System.out.println("Invalid PIN. Cannot deposit.");
-            return;
-        }
         System.out.println("Enter the amount to deposit:");
-        Scanner sc = new Scanner(System.in);
         double amount = sc.nextDouble();
         if(amount <= 0){
             System.out.println("Invalid Amount.");
             return;
         }
-        if(amount % 100 != 0 && amount % 200 != 0 && amount % 500 != 0){
+        if(amount % 100 != 0){
             System.out.println("Amount should be in multiples of 100, 200, or 500.");
             return;
         }
-        double balance = main.user.get(pin);
+        double balance = Main.user.get(pin);
         balance += amount;
-        main.user.put(pin, balance);
+        Main.user.put(pin, balance);
         System.out.println("Amount Deposited Successfully.");
     }
 }
