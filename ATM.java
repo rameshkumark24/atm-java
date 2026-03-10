@@ -1,96 +1,111 @@
 import java.util.*;
-class ATM{
+
+class ATM {
+
     static Scanner sc = new Scanner(System.in);
-    public static void run(){
-        int count = 0;
-        while(count < 3){
-            System.out.println("Enter your PIN:");
+
+    public static void run() {
+
+        int attempts = 0;
+
+        while (attempts < 3) {
+
+            System.out.println("Enter Account Number:");
+            int accountNumber = sc.nextInt();
+
+            System.out.println("Enter PIN:");
             int pin = sc.nextInt();
-            Integer account = Main.getAccountByPin(pin);
-            if(account != null){
-                while(true){
-                    System.out.println("1. Check Balance");
-                    System.out.println("2. Withdraw");
-                    System.out.println("3. Deposit");
-                    System.out.println("4. Change PIN");
-                    System.out.println("5. Exit");
-                    System.out.println("Choose an option:");
-                    int choice = sc.nextInt();
-                    switch(choice){
-                        case 1:
-                            get_balance(account);
-                            break;
-                        case 2:
-                            withdraw(account);
-                            break;
-                        case 3:
-                            deposit(account);
-                            break;
-                        case 4:
-                            changepin(account);
-                            break;
-                        case 5:
-                            System.out.println("Thank you for using ATM.");
-                            return;
-                        default:
-                            System.out.println("Invalid option.");
-                    }
-                }
+
+            Main.User user = Main.authenticate(accountNumber, pin);
+
+            if (user != null) {
+                showMenu(user);
+                return;
+            } else {
+                System.out.println("Invalid Account Number or PIN.");
+                attempts++;
             }
-            else{
-                System.out.println("Invalid PIN");
-                count++;
-                if(count >= 3){
-                    System.out.println("Too many failed attempts. Exiting.");
+        }
+
+        System.out.println("Too many failed attempts. Exiting.");
+    }
+
+    private static void showMenu(Main.User user) {
+
+        while (true) {
+
+            System.out.println("\n1. Check Balance");
+            System.out.println("2. Withdraw");
+            System.out.println("3. Deposit");
+            System.out.println("4. Change PIN");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    checkBalance(user);
+                    break;
+                case 2:
+                    withdraw(user);
+                    break;
+                case 3:
+                    deposit(user);
+                    break;
+                case 4:
+                    changePin(user);
+                    break;
+                case 5:
+                    System.out.println("Thank you for using ATM.");
                     return;
-                }
+                default:
+                    System.out.println("Invalid option.");
             }
         }
     }
-    private static void get_balance(int account){
-        System.out.println("Your balance is: " + Main.users.get(account).balance);
+
+    private static void checkBalance(Main.User user) {
+        System.out.println("Your balance is: " + user.getBalance());
     }
-    private static void withdraw(int account){
-        double balance = Main.users.get(account).balance;
-        System.out.println("Enter the amount to withdraw:");
-        double amount = sc.nextDouble();
-        if(amount <= 0){
-            System.out.println("Invalid Amount.");
+
+    private static void withdraw(Main.User user) {
+
+        System.out.println("Enter amount to withdraw:");
+        long amount = sc.nextLong();
+
+        if (amount <= 0 || amount % 100 != 0) {
+            System.out.println("Invalid amount. Must be multiple of 100.");
             return;
         }
-        if(amount % 100 != 0){
-            System.out.println("Amount should be in multiples of 100, 200, or 500.");
-            return;
-        }
-        if(amount > balance){
+
+        if (user.withdraw(amount)) {
+            System.out.println("Amount Withdrawn Successfully.");
+        } else {
             System.out.println("Insufficient Balance.");
         }
-        else{
-            balance -= amount;
-            Main.users.get(account).balance = balance;
-            System.out.println("Amount Withdrawn Successfully.");
-        }
     }
-    private static void changepin(int account){
-        System.out.println("Enter the new PIN:");
-        int newpin = sc.nextInt();
-        Main.users.get(account).pin = newpin;
-        System.out.println("PIN Changed Successfully.");
-    }
-    private static void deposit(int account){
-        System.out.println("Enter the amount to deposit:");
-        double amount = sc.nextDouble();
-        if(amount <= 0){
-            System.out.println("Invalid Amount.");
+
+    private static void deposit(Main.User user) {
+
+        System.out.println("Enter amount to deposit:");
+        long amount = sc.nextLong();
+
+        if (amount <= 0 || amount % 100 != 0) {
+            System.out.println("Invalid amount. Must be multiple of 100.");
             return;
         }
-        if(amount % 100 != 0){
-            System.out.println("Amount should be in multiples of 100, 200, or 500.");
-            return;
-        }
-        double balance = Main.users.get(account).balance;
-        balance += amount;
-        Main.users.get(account).balance = balance;
+
+        user.deposit(amount);
         System.out.println("Amount Deposited Successfully.");
+    }
+
+    private static void changePin(Main.User user) {
+
+        System.out.println("Enter new PIN:");
+        int newPin = sc.nextInt();
+
+        user.changePin(newPin);
+        System.out.println("PIN Changed Successfully.");
     }
 }
